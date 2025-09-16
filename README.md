@@ -1,6 +1,6 @@
 # Arduino Temperature Controlled Fan
 
-This project uses a 10k NTC thermistor on A0 and a DC fan (simulated with LED/PWM on Pin 9).  
+This project uses a 10k NTC thermistor on A0 and a DC fan.  
 The fan speed is controlled based on temperature:
 
 - **Temp < 25°C** → Fan OFF  
