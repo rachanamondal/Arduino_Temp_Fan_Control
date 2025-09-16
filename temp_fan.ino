@@ -1,14 +1,13 @@
-// Arduino: Temperature controlled fan using NTC thermistor
-// Input: NTC on A0
-// Output: LED on D13 simulating fan
+// Temperature Controlled Fan Simulation with LED on D13
+// NTC 10k on A0, LED on D13 (fan simulation)
 
-const int thermistorPin = A0;
-const int fanPin = 9;  // Use PWM pin (not D13, because D13 has no PWM)
+const int sensorPin = A0;
+const int fanPin = 13;
 
-// Constants for NTC
-const float BETA = 3950;   // Beta coefficient of NTC (typical)
-const float R0 = 10000;    // 10k ohm at 25°C
-const float T0 = 298.15;   // 25°C in Kelvin
+// NTC parameters (approx values for 10k thermistor)
+const float BETA = 3950;    // Beta parameter
+const float T0 = 298.15;    // Reference temp (25°C in Kelvin)
+const float R0 = 10000;     // Resistance at 25°C (10k)
 
 void setup() {
   Serial.begin(9600);
@@ -16,34 +15,35 @@ void setup() {
 }
 
 void loop() {
-  int adcValue = analogRead(thermistorPin);
+  int analogValue = analogRead(sensorPin);
 
   // Convert ADC to resistance
-  float R = 10000.0 * (1023.0 / adcValue - 1.0);
+  float R = 10000.0 * (1023.0 / analogValue - 1.0);
 
-  // Convert resistance to temperature (Steinhart–Hart approx)
-  float tempK = 1.0 / (1.0 / T0 + (1.0 / BETA) * log(R / R0));
-  float tempC = tempK - 273.15;
+  // Steinhart-Hart equation
+  float temperatureK = 1.0 / (1.0/T0 + (1.0/BETA) * log(R/R0));
+  float temperatureC = temperatureK - 273.15;
 
-  // Fan control logic
-  if (tempC < 25) {
-    analogWrite(fanPin, 0);
-    Serial.print("Temp: ");
-    Serial.print(tempC);
-    Serial.println(" °C | Fan: OFF");
+  // Fan Control
+  if (temperatureC < 25) {
+    digitalWrite(fanPin, LOW);  // Fan OFF
+    Serial.print("Temp: "); Serial.print(temperatureC);
+    Serial.println(" °C | Fan OFF");
   } 
-  else if (tempC < 30) {
-    analogWrite(fanPin, 128); // ~50% duty
-    Serial.print("Temp: ");
-    Serial.print(tempC);
-    Serial.println(" °C | Fan: 50%");
+  else if (temperatureC >= 25 && temperatureC < 30) {
+    // Simulate 50% PWM by blinking
+    digitalWrite(fanPin, HIGH);
+    delay(500);
+    digitalWrite(fanPin, LOW);
+    delay(500);
+    Serial.print("Temp: "); Serial.print(temperatureC);
+    Serial.println(" °C | Fan 50% (Simulated Blink)");
   } 
   else {
-    analogWrite(fanPin, 255); // 100% duty
-    Serial.print("Temp: ");
-    Serial.print(tempC);
-    Serial.println(" °C | Fan: 100%");
+    digitalWrite(fanPin, HIGH);  // Fan ON full speed
+    Serial.print("Temp: "); Serial.print(temperatureC);
+    Serial.println(" °C | Fan 100%");
   }
 
-  delay(1000); // Update every second
+  delay(200);
 }
